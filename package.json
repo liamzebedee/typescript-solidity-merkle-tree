@@ -1,0 +1,23 @@
+{
+  "name": "ts-merkle-tree",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liamzebedee/ts-merkle-tree.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/liamzebedee/ts-merkle-tree/issues"
+  },
+  "homepage": "https://github.com/liamzebedee/ts-merkle-tree#readme",
+  "dependencies": {
+    "@types/node": "^10.12.21",
+    "typescript": "^3.3.1"
+  }
+}
