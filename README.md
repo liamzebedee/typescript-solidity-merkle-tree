@@ -1,6 +1,8 @@
 typescript-solidity-merkle-tree
 ===============================
 
+[![npm version](https://badge.fury.io/js/typescript-solidity-merkle-tree.svg)](https://badge.fury.io/js/typescript-solidity-merkle-tree)
+
 TypeScript Merkle tree that comes with Solidity proof verifier. Unit tested for your pleasure!
 
  * handles all edge cases: odd numbers of items, empty/duplicates, canonical sorting
