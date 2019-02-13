@@ -1,23 +1,44 @@
 {
-  "name": "ts-merkle-tree",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "typescript-solidity-merkle-tree",
+  "version": "0.1.0",
+  "description": "TypeScript Merkle tree that comes with Solidity proof verifier. Unit tested for your pleasure!",
+  "main": "lib/src/index.js",
+  "files": [
+    "build",
+    "contracts"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "yarn build:typescript && yarn build:contracts",
+    "build:typescript": "tsc -p tsconfig.json",
+    "build:contracts": "sol-compiler contracts/ && yarn build:contracts:abis",
+    "build:contracts:abis": "abi-gen --abis 'build/artifacts/*.json' --template contract_templates/contract.handlebars --partials './contract_templates/partials/**/*.handlebars' --output ./build/wrappers --backend web3",
+    "pretest": "yarn build",
+    "test": "mocha -r source-map-support/register -r make-promises-safe --bail --exit lib/test/index.spec.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liamzebedee/ts-merkle-tree.git"
+    "url": "git+https://github.com/liamzebedee/typescript-solidity-merkle-tree.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "liamzebedee",
+  "license": "GPL",
   "bugs": {
-    "url": "https://github.com/liamzebedee/ts-merkle-tree/issues"
+    "url": "https://github.com/liamzebedee/typescript-solidity-merkle-tree/issues"
   },
-  "homepage": "https://github.com/liamzebedee/ts-merkle-tree#readme",
+  "homepage": "https://github.com/liamzebedee/typescript-solidity-merkle-tree#readme",
   "dependencies": {
+    "0x.js": "^5.0.0",
+    "@0x/abi-gen": "^2.0.3",
+    "@0x/sol-compiler": "^3.0.3",
+    "@0x/sol-trace": "^2.0.4",
+    "@0x/web3-wrapper": "^5.0.0",
     "@types/node": "^10.12.21",
-    "typescript": "^3.3.1"
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "ganache-core": "^2.4.0",
+    "mocha": "^5.2.0",
+    "source-map-support": "^0.5.10",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.3.1",
+    "web3-eth-abi": "^1.0.0-beta.46"
   }
 }

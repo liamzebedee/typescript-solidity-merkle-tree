@@ -1,8 +1,11 @@
 {
     "compilerOptions": {
         "lib": [
-            "es6"
+            "es2018",
+            "dom"
         ],
+        "rootDir": ".",
+        "outDir": "lib",
         "typeRoots": [
           "node_modules/@0x/typescript-typings/types",
           "node_modules/@types"
@@ -11,6 +14,14 @@
         "esModuleInterop": true,
         "moduleResolution": "node",
         "module": "commonjs",
-
-    }
+        "sourceMap": true
+    },
+    "include": [
+        "src/",
+        "test/",
+        "build/wrappers/"
+    ],
+    "exclude": [
+        "node_modules/**"
+    ]
 }
