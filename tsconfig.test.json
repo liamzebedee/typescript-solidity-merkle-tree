@@ -17,8 +17,7 @@
         "sourceMap": true
     },
     "include": [
-        "src/",
-        "build/wrappers/"
+        "test/"
     ],
     "exclude": [
         "node_modules/**"

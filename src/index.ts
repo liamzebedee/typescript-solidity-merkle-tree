@@ -16,8 +16,13 @@ const LEAF_PREFIX = Buffer.from('00', 'hex');
 const BRANCH_PREFIX = Buffer.from('01', 'hex');
 
 type HashFunction = (buf: Buffer) => Buffer;
+type MerkleTreeProof = {
+	proofs: Buffer[];
+	paths: boolean[];
+}
 
 class MerkleTree {
+	leaves: Buffer[];
 	layers: Buffer[][];
 	nLayers: number;
 	hashFn: (buf: Buffer) => Buffer;
@@ -35,9 +40,9 @@ class MerkleTree {
 		leaves.filter((buf, idx) => {
 			if (firstIndexOf(buf, leaves) !== idx) throw new Error(`Duplicate item at ${idx}`);
 		});
-
-		// sort ASC order
-		leaves = leaves.sort().reverse()
+		
+		// sort DESC order
+		leaves = leaves.sort()
 
 		// Make sure it's even
 		if (leaves.length % 2 == 1) {
@@ -46,9 +51,11 @@ class MerkleTree {
 			// leaves = [leaves[0], ...leaves]
 		}
 
+		this.leaves = leaves;
+
 		// Now hash all.
 		leaves = leaves.map(leaf => this.hashLeaf(leaf))
-
+		
 		// And compute tree
 		this.layers = this.computeTree(leaves);
 	}
@@ -79,28 +86,35 @@ class MerkleTree {
 		return this.layers[0][this.findLeafIndex(item)]
 	}
 
-	generateProof(item: Buffer): Buffer[] {
-		let proof: Buffer[] = new Array(this.nLayers - 1);
+	generateProof(item: Buffer): MerkleTreeProof {
+		let proofs: Buffer[] = new Array(this.nLayers - 1);
+		let paths = [];
 
 		let idx = this.findLeafIndex(item)
 
-		for (let i = 0; i < this.nLayers - 1; i++) {
+		for (let i = 0; i < proofs.length; i++) {
 			let layer = this.layers[i];
 
-			if (i == this.nLayers - 1) {
-				proof[i] = layer[0];
-			} else {
-				const pairIdx = idx % 2 === 0 ? idx + 1 : idx - 1;
-				proof[i] = layer[pairIdx];
-				idx = Math.floor(idx / 2);
-			}
+			// if (i == this.nLayers - 1) {
+			// 	proof[i] = layer[0];
+			// } else {
+			// 	const pairIdx = idx % 2 === 0 ? idx + 1 : idx - 1;
+			// 	proof[i] = layer[pairIdx];
+			// 	idx = Math.floor(idx / 2);
+			// }
+			let isLeftNode = idx % 2 === 0;
+			paths.push(!isLeftNode);
+
+			const pairIdx = isLeftNode ? idx + 1 : idx - 1;
+			proofs[i] = layer[pairIdx];
+			idx = Math.floor(idx / 2);
 		}
 
-		return proof
+		return { proofs, paths }
 	}
 
-	verifyProof(proof: Buffer[], leaf: Buffer) {
-		if (proof.length != this.nLayers - 1) throw new Error(`${proof.length} proof nodes, but only ${this.nLayers} layers in tree`)
+	verifyProof(proof: MerkleTreeProof, leaf: Buffer) {
+		if (proof.proofs.length != this.nLayers - 1) throw new Error(`${proof.proofs.length} proof nodes, but only ${this.nLayers} layers in tree`)
 		if(firstIndexOf(leaf, this.layers[0]) == -1) throw new Error(`Leaf doesn't exist in original tree`);
 		return verifyProof(this.hashFn, proof, this.root(), leaf);
 	}
@@ -137,10 +151,18 @@ class MerkleTree {
 
 	toString() {
 		let str = "";
+		
+		let j = 0;
+
 		this.layers.map((layer, i) => {
 			str += `Layer ${i} - \n`;
+			
 			for (let node of layer) {
-				str += '\t ' + node.toString('hex') + `\n`;
+				str += '\t ' + node.toString('hex');
+				if(i == 0) {
+					str += '\t' + this.leaves[j++].toString('hex')
+				}
+				str += '\n';
 			}
 		})
 		return str;
@@ -156,15 +178,15 @@ function hashBranch(hashFn: HashFunction, left, right: Buffer): Buffer {
 	return hashFn(Buffer.concat([BRANCH_PREFIX, left, right]))
 }
 
-function verifyProof(hashFn: HashFunction, proof: Buffer[], root: Buffer, leaf: Buffer) {
+function verifyProof(hashFn: HashFunction, proof: MerkleTreeProof, root: Buffer, leaf: Buffer) {
 	let node = leaf;
 
 	// node > proof
 	// node.compare(proof[0]) == 1
-	let dir = node.compare(proof[0]);
+	let { proofs, paths } = proof;
 
-	for (let i = 0; i < proof.length; i++) {
-		let pairNode = proof[i];
+	for (let i = 0; i < proofs.length; i++) {
+		let pairNode = proofs[i];
 
 		if(debug) {
 			console.log(`Verifying layer ${i}`)
@@ -172,7 +194,7 @@ function verifyProof(hashFn: HashFunction, proof: Buffer[], root: Buffer, leaf: 
 			console.log(`\t`, pairNode)
 		}
 
-		if (dir) {
+		if(paths[i]) {
 			node = hashBranch(hashFn, pairNode, node)
 		} else {
 			node = hashBranch(hashFn, node, pairNode)
@@ -181,7 +203,7 @@ function verifyProof(hashFn: HashFunction, proof: Buffer[], root: Buffer, leaf: 
 
 	if(debug) {
 		console.log(`Verify root`)
-		console.log('\t', this.root())
+		console.log('\t', root)
 		console.log('\t', node)
 	}
 
@@ -190,10 +212,10 @@ function verifyProof(hashFn: HashFunction, proof: Buffer[], root: Buffer, leaf: 
 
 export {
 	MerkleTree,
+	MerkleTreeProof,
 	hashLeaf,
 	hashBranch,
 	verifyProof,
 	LEAF_PREFIX,
-	BRANCH_PREFIX,
-	debug
+	BRANCH_PREFIX
 };

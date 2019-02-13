@@ -1,6 +1,6 @@
 
 const chai = require('chai')
-import { expect } from 'chai';
+import { expect, assert } from 'chai';
 import { describe, it, before, teardown, Test } from 'mocha';
 chai.use(require('chai-as-promised'))
 require('mocha')
@@ -9,7 +9,9 @@ import {
     MerkleTree,
     hashBranch,
     hashLeaf,
+    debug
 } from "../src";
+
 
 import { MerkleTreeVerifierContract } from '../build/wrappers/merkle_tree_verifier';
 
@@ -27,7 +29,7 @@ const AbiCoder = require('web3-eth-abi').AbiCoder();
 
 
 
-describe.only('Typescript Merkle tree', function() {
+describe('Typescript Merkle tree', function() {
     it('runs example', async () => {
         let items = [
             Buffer.from('123', 'hex'),
@@ -39,6 +41,31 @@ describe.only('Typescript Merkle tree', function() {
         let proof = tree.generateProof(items[1]);
         expect(tree.verifyProof(proof, tree.findLeaf(items[1]))).to.be.true;
         expect(tree.verifyProof(proof, tree.findLeaf(items[0]))).to.be.false;
+    })
+
+    it('handles two duplicate elements', async () => {
+        let items = [
+            Buffer.from('12', 'hex'),
+            Buffer.from('15', 'hex'),
+            Buffer.from('20', 'hex'),
+            Buffer.from('25', 'hex')
+        ];
+        
+        let tree = new MerkleTree(items, keccak256);
+        let leaves = tree.layers[0];
+
+        console.log(tree.toString())
+        
+        function verify(item) {
+            console.log('item', item)
+            let proof = tree.generateProof(item)
+            console.log(proof)
+            let leaf = tree.findLeaf(item)
+            expect(tree.verifyProof(proof, leaf)).to.be.true;
+        } 
+
+        items.map(verify)
+
     })
 })
 
@@ -149,7 +176,8 @@ describe('Solidity verifier', function() {
         expect(tree.verifyProof(proof, leafToProve)).to.be.true;
 
         let root = await merkleTreeVerifier._computeRoot.callAsync(
-            proof.map(hexify), 
+            proof.proofs.map(hexify),
+            proof.paths,
             hexify(leafToProve)
         )
         
@@ -157,7 +185,8 @@ describe('Solidity verifier', function() {
         expect(root).to.eq(hexify(tree.root()))
 
         let verify = await merkleTreeVerifier._verify.callAsync(
-            proof.map(hexify), 
+            proof.proofs.map(hexify), 
+            proof.paths,
             hexify(tree.root()), 
             hexify(leafToProve)
         )

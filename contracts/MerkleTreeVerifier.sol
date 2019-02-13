@@ -8,19 +8,18 @@ library MerkleTreeVerifier {
      * @param root Merkle root
      * @param leaf Leaf of Merkle tree
      */
-    function _verify(bytes32[] memory proof, bytes32 root, bytes32 leaf) public pure returns (bool) {
+    function _verify(bytes32[] memory proof, bool[] memory paths, bytes32 root, bytes32 leaf) public pure returns (bool) {
         // Check if the computed hash (root) is equal to the provided root
-        return _computeRoot(proof, leaf) == root;
+        return _computeRoot(proof, paths, leaf) == root;
     }
 
-    function _computeRoot(bytes32[] memory proof, bytes32 leaf) public pure returns (bytes32) {        
+    function _computeRoot(bytes32[] memory proof, bool[] memory paths, bytes32 leaf) public pure returns (bytes32) {        
         bytes32 node = leaf;
-        bool dir = node > proof[0];
 
         for (uint256 i = 0; i < proof.length; i++) {
             bytes32 pairNode = proof[i];
 
-            if (dir) {
+            if (paths[i]) {
                 // Hash(current element of the proof + current computed hash)
                 node = _hashBranch(pairNode, node);
             } else {
