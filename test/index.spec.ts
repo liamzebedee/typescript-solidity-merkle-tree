@@ -27,8 +27,19 @@ const AbiCoder = require('web3-eth-abi').AbiCoder();
 
 
 
-describe('Typescript Merkle tree', function() {
-
+describe.only('Typescript Merkle tree', function() {
+    it('runs example', async () => {
+        let items = [
+            Buffer.from('123', 'hex'),
+            Buffer.from('foobar')
+        ];
+        
+        let tree = new MerkleTree(items, keccak256);
+        
+        let proof = tree.generateProof(items[1]);
+        expect(tree.verifyProof(proof, tree.findLeaf(items[1]))).to.be.true;
+        expect(tree.verifyProof(proof, tree.findLeaf(items[0]))).to.be.false;
+    })
 })
 
 describe('Solidity verifier', function() {

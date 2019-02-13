@@ -27,8 +27,8 @@ let items = [
 let tree = new MerkleTree(items, keccak256);
 
 let proof = tree.generateProof(items[1]);
-tree.verifyProof(proof, items[1]); // true
-tree.verifyProof(proof, items[0]); // false
+tree.verifyProof(proof, tree.findLeaf(items[1])); // true
+tree.verifyProof(proof, tree.findLeaf(items[0])); // false
 
 tree.root() // Buffer(aa bb cc)
 

@@ -1,6 +1,6 @@
 {
   "name": "typescript-solidity-merkle-tree",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TypeScript Merkle tree that comes with Solidity proof verifier. Unit tested for your pleasure!",
   "main": "lib/src/index.js",
   "files": [
@@ -20,7 +20,7 @@
     "url": "git+https://github.com/liamzebedee/typescript-solidity-merkle-tree.git"
   },
   "author": "liamzebedee",
-  "license": "GPL",
+  "license": "GPL-3.0-only",
   "bugs": {
     "url": "https://github.com/liamzebedee/typescript-solidity-merkle-tree/issues"
   },
