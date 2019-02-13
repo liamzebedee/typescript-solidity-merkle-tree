@@ -14,7 +14,9 @@
         "esModuleInterop": true,
         "moduleResolution": "node",
         "module": "commonjs",
-        "sourceMap": true
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true
     },
     "include": [
         "src/",
