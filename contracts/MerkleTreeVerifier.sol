@@ -1,6 +1,34 @@
 pragma solidity ^0.5.0;
 
 library MerkleTreeVerifier {
+    function _computeMerkleRoot(bytes32[] memory items) public pure returns (bytes32) {
+        for(uint256 i = 0; i < items.length; i++) {
+            items[i] = _hashLeaf(items[i]);
+        }
+
+        uint len = items.length / 2;
+
+        while(len > 0) {
+            for (uint256 i = 0; i < len; i++) {
+                uint left = i * 2;
+                uint right;
+
+                if(i == items.length - 1 && items.length % 2 == 1) {
+                    right = left;
+                } else {
+                    right = left + 1;
+                }
+
+                items[i] = _hashBranch(items[left], items[right]);
+            }
+
+            len /= 2;
+        }
+
+        return items[0];        
+    }
+
+
     /**
      * @dev Verifies a Merkle proof proving the existence of a leaf in a Merkle tree. Assumes that each pair of leaves
      * and each pair of pre-images are sorted.
@@ -31,7 +59,7 @@ library MerkleTreeVerifier {
         return node;
     }
     
-    function _hashLeaf(bytes32[] memory leaf) public pure returns (bytes32) {
+    function _hashLeaf(bytes32 leaf) public pure returns (bytes32) {
         bytes1 LEAF_PREFIX = 0x00;
         return keccak256(abi.encodePacked(LEAF_PREFIX, leaf));
     }

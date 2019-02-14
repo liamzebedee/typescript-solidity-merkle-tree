@@ -210,6 +210,8 @@ function verifyProof(hashFn: HashFunction, proof: MerkleTreeProof, root: Buffer,
 	return root.equals(node);
 }
 
+export * from './mmr'
+
 export {
 	MerkleTree,
 	MerkleTreeProof,

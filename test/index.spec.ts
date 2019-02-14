@@ -9,7 +9,6 @@ import {
     MerkleTree,
     hashBranch,
     hashLeaf,
-    debug
 } from "../src";
 
 
@@ -114,6 +113,24 @@ describe('Solidity verifier', function() {
         );
     });
 
+    it('_computeMerkleRoot', async () => {
+        let items = TestTreeFactory.itemsToBuffer([
+            '12',
+            '15',
+            '20',
+            '25'
+        ].map(item => [item]))
+        
+        let tree = new MerkleTree(items, keccak256);
+        let rootJs = tree.root();
+
+        let rootSol = await merkleTreeVerifier._computeMerkleRoot.callAsync(
+            items.map(hexify)
+        );
+
+        expect(rootSol).to.eq(hexify(rootJs));
+    })
+
     it('_hashLeaf', async() => {
         let data = ['00','2'];
 
@@ -129,7 +146,7 @@ describe('Solidity verifier', function() {
         let hashJs = hashLeaf(keccak256, buf);
 
         let hashSol = await merkleTreeVerifier._hashLeaf.callAsync(
-            hex.map(prefix0x)
+            hexify(buf)
         )
 
         expect(hashSol).to.eq(hexify(hashJs));

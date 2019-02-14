@@ -60,6 +60,11 @@ import "typescript-solidity-merkle-tree/contracts/MerkleTreeVerifier.sol";
 
 contract YourContract {
     bytes root = 0x00;
+    bytes32[] events;
+
+    function computeState() public {
+        root = MerkleTreeVerifier._computeMerkleRoot(events);
+    }
 
     function updateState(bytes32[] proof, bool[] proofPaths, bytes32 leaf) public {
         require(MerkleTreeVerifier._verify(proof, proofPaths, root, leaf) == true, "INVALID_PROOF");

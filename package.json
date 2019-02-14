@@ -1,6 +1,6 @@
 {
   "name": "typescript-solidity-merkle-tree",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "TypeScript Merkle tree that comes with Solidity proof verifier. Unit tested for your pleasure!",
   "main": "./lib/src/index.js",
   "types": "./lib/src/index.d.ts",
