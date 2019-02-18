@@ -15,8 +15,9 @@
     "build:typescript": "tsc -p tsconfig.json",
     "build:contracts": "sol-compiler contracts/ && yarn build:contracts:abis",
     "build:contracts:abis": "abi-gen --abis 'build/artifacts/*.json' --template contract_templates/contract.handlebars --partials './contract_templates/partials/**/*.handlebars' --output ./build/wrappers --backend web3",
-    "pretest": "tsc -p tsconfig.test.json",
-    "test": "mocha -r source-map-support/register -r make-promises-safe --bail --exit lib/test/index.spec.js"
+    "test:watch": "tsc -p tsconfig.test.json -W",
+    "test": "mocha -r source-map-support/register -r make-promises-safe --bail --exit lib/test/solidity.spec.js",
+    "test:typescript": "mocha -r source-map-support/register -r make-promises-safe --bail --exit lib/test/typescript.spec.js"
   },
   "repository": {
     "type": "git",
@@ -41,6 +42,7 @@
     "@0x/web3-wrapper": "^5.0.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
+    "chai-bytes": "^0.1.2",
     "ganache-core": "^2.4.0",
     "mocha": "^5.2.0",
     "source-map-support": "^0.5.10",

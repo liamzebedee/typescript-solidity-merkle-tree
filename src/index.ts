@@ -17,11 +17,14 @@ const BRANCH_PREFIX = Buffer.from('01', 'hex');
 
 type HashFunction = (buf: Buffer) => Buffer;
 type MerkleTreeProof = {
+	root: Buffer;
+	leaf: Buffer;
 	proofs: Buffer[];
 	paths: boolean[];
 }
 
 class MerkleTree {
+	items: Buffer[];
 	leaves: Buffer[];
 	layers: Buffer[][];
 	nLayers: number;
@@ -30,6 +33,7 @@ class MerkleTree {
 
 	constructor(items: Buffer[], hashFn: HashFunction) {
 		let leaves = items;
+		this.items = items;
 		this.hashFn = hashFn;
 		this.hashSizeBytes = hashFn(BRANCH_PREFIX).byteLength;
 
@@ -37,27 +41,40 @@ class MerkleTree {
 		// leaves = leaves.filter(el => el)
 
 		// check for duplicates
-		leaves.filter((buf, idx) => {
-			if (firstIndexOf(buf, leaves) !== idx) throw new Error(`Duplicate item at ${idx}`);
-		});
+		// leaves.filter((buf, idx) => {
+		// 	if (firstIndexOf(buf, leaves) !== idx) throw new Error(`Duplicate item at ${idx}`);
+		// });
 		
 		// sort DESC order
-		leaves = leaves.sort()
+		// leaves = leaves.sort()
+		
+		// this.leaves = leaves;
 
-		// Make sure it's even
-		if (leaves.length % 2 == 1) {
-			// Some languages (ie Solidity) don't have prepend, so this makes compatible implementations easier.
-			leaves = [...leaves, leaves[leaves.length - 1]]
-			// leaves = [leaves[0], ...leaves]
+		// compute the balanced layer
+		if(leaves.length === 1) leaves = leaves.concat(leaves)
+		let balancedLeaves = new Array<Buffer>(
+			Math.pow(2, Math.ceil(Math.log2(
+				leaves.length
+			)))
+		);
+
+		for(let j = 0; j < balancedLeaves.length; j++) {
+			if(j > (leaves.length-1)) {
+				balancedLeaves[j] = leaves[leaves.length - 1];
+			} else {
+				balancedLeaves[j] = leaves[j];
+			}
 		}
 
-		this.leaves = leaves;
+		// layers[i] = balancedLeaves;
+		leaves = balancedLeaves;
 
+		
 		// Now hash all.
-		leaves = leaves.map(leaf => this.hashLeaf(leaf))
+		this.leaves = leaves.map(leaf => this.hashLeaf(leaf))
 		
 		// And compute tree
-		this.layers = this.computeTree(leaves);
+		this.layers = this.computeTree(this.leaves);
 	}
 
 	root(): Buffer {
@@ -86,11 +103,10 @@ class MerkleTree {
 		return this.layers[0][this.findLeafIndex(item)]
 	}
 
-	generateProof(item: Buffer): MerkleTreeProof {
+	generateProof(idx: number): MerkleTreeProof {
 		let proofs: Buffer[] = new Array(this.nLayers - 1);
 		let paths = [];
-
-		let idx = this.findLeafIndex(item)
+		let leaf = this.layers[0][idx]
 
 		for (let i = 0; i < proofs.length; i++) {
 			let layer = this.layers[i];
@@ -110,13 +126,13 @@ class MerkleTree {
 			idx = Math.floor(idx / 2);
 		}
 
-		return { proofs, paths }
+		return { proofs, paths, leaf, root: this.root() }
 	}
 
 	verifyProof(proof: MerkleTreeProof, leaf: Buffer) {
 		if (proof.proofs.length != this.nLayers - 1) throw new Error(`${proof.proofs.length} proof nodes, but only ${this.nLayers} layers in tree`)
 		if(firstIndexOf(leaf, this.layers[0]) == -1) throw new Error(`Leaf doesn't exist in original tree`);
-		return verifyProof(this.hashFn, proof, this.root(), leaf);
+		return verifyProof(this.hashFn, proof, this.root(), proof.leaf);
 	}
 
 	private computeTree(leaves: Buffer[]) {
@@ -128,16 +144,24 @@ class MerkleTree {
 			if (i == 0) {
 				layers[i] = leaves;
 				continue;
+			} else {
+				layers[i] = this.computeLayer(layers[i - 1]);
 			}
 
-			layers[i] = this.computeLayer(layers[i - 1]);
 		}
 
 		return layers;
 	}
 
-	private computeLayer(leaves: Buffer[]): Buffer[] {
+	computeLayer(leaves: Buffer[]): Buffer[] {
 		let nodes: Buffer[] = [];
+
+		// Make sure it's even
+		if (leaves.length % 2 == 1) {
+			// Some languages (ie Solidity) don't have prepend, so this makes compatible implementations easier.
+			leaves = [...leaves, leaves[leaves.length - 1]]
+			// leaves = [leaves[0], ...leaves]
+		}
 
 		for (let i = 0; i < leaves.length;) {
 			nodes.push(
@@ -160,7 +184,8 @@ class MerkleTree {
 			for (let node of layer) {
 				str += '\t ' + node.toString('hex');
 				if(i == 0) {
-					str += '\t' + this.leaves[j++].toString('hex')
+					if(j < this.items.length - 1)
+						str += '\t' + this.items[j++].toString('hex')
 				}
 				str += '\n';
 			}

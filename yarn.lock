@@ -1788,6 +1788,11 @@ chai-bignumber@^3.0.0:
   resolved "https://registry.yarnpkg.com/chai-bignumber/-/chai-bignumber-3.0.0.tgz#e90cf1f468355bbb11a9acd051222586cd2648a9"
   integrity sha512-SubOtaSI2AILWTWe2j0c6i2yFT/f9J6UBjeVGDuwDiPLkF/U5+/eTWUE3sbCZ1KgcPF6UJsDVYbIxaYA097MQA==
 
+chai-bytes@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/chai-bytes/-/chai-bytes-0.1.2.tgz#c297e81d47eb3106af0676ded5bb5e0c9f981db3"
+  integrity sha512-0ol6oJS0y1ozj6AZK8n1pyv1/G+l44nqUJygAkK1UrYl+IOGie5vcrEdrAlwmLYGIA9NVvtHWosPYwWWIXf/XA==
+
 chai@^4.0.1, chai@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/chai/-/chai-4.2.0.tgz#760aa72cf20e3795e84b12877ce0e83737aa29e5"
