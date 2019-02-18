@@ -1,6 +1,6 @@
 {
   "name": "typescript-solidity-merkle-tree",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "TypeScript Merkle tree that comes with Solidity proof verifier. Unit tested for your pleasure!",
   "main": "./lib/src/index.js",
   "types": "./lib/src/index.d.ts",
@@ -16,7 +16,8 @@
     "build:contracts": "sol-compiler contracts/ && yarn build:contracts:abis",
     "build:contracts:abis": "abi-gen --abis 'build/artifacts/*.json' --template contract_templates/contract.handlebars --partials './contract_templates/partials/**/*.handlebars' --output ./build/wrappers --backend web3",
     "test:watch": "tsc -p tsconfig.test.json -W",
-    "test": "mocha -r source-map-support/register -r make-promises-safe --bail --exit lib/test/solidity.spec.js",
+    "test": "npm run test:solidity && npm run test:typescript",
+    "test:solidity": "mocha -r source-map-support/register -r make-promises-safe --bail --exit lib/test/solidity.spec.js",
     "test:typescript": "mocha -r source-map-support/register -r make-promises-safe --bail --exit lib/test/typescript.spec.js"
   },
   "repository": {

@@ -5,9 +5,9 @@ typescript-solidity-merkle-tree
 
 TypeScript Merkle tree that comes with Solidity proof verifier. Unit tested for your pleasure!
 
- * handles all edge cases: odd numbers of items, empty/duplicates, canonical sorting
+ * handles all edge cases: odd numbers of items, empty/duplicates, lists that aren't powers of two
  * simple API based on Buffer's - use whatever data type you want, just convert it
- * works well with Ethereum smart contracts, with its accompanying Solidity verifier
+ * works well with Ethereum smart contracts, with its accompanying Solidity verifier and root generator
  * fixed array allocations (perf++)
  * secure against [second preimage attacks](https://flawed.net.nz/2018/02/21/attacking-merkle-trees-with-a-second-preimage-attack/)
 
@@ -28,9 +28,9 @@ let items = [
 
 let tree = new MerkleTree(items, keccak256);
 
-let proof = tree.generateProof(items[1]);
-tree.verifyProof(proof, tree.findLeaf(items[1])); // true
-tree.verifyProof(proof, tree.findLeaf(items[0])); // false
+let itemToProveIdx = 2;
+let proof = tree.generateProof(itemToProveIdx);
+tree.verifyProof(proof); // true
 
 tree.root() 
 // <Buffer 8c 9f ef 65 d6 b7 e7 73 d3 56 b6 ef cd 62 af 26 ef 51 24 22 f0 f6 16 78 b7 c8 9b 4a 37 6f f3 d3>
@@ -74,3 +74,13 @@ contract YourContract {
 ```
 
 Note that if you are using 0x's compiler, you should be aware of naming conflicts if there are other contract files named 'MerkleTreeVerifier.sol'.
+
+## Develop
+```
+# tests
+yarn test:watch
+yarn test
+
+# build
+yarn build
+```

@@ -49,7 +49,7 @@ library MerkleTreeVerifier {
     }
 
     function _getBalancedLayer(bytes32[] memory items) public pure returns (bytes32[] memory) {
-        uint powerOf2Size = 2 ** log2(items.length);
+        uint powerOf2Size = 2 ** math_log2(items.length);
         if(items.length == 1) {
             powerOf2Size = 2; 
         }
@@ -66,9 +66,9 @@ library MerkleTreeVerifier {
     }
 
     function _computeLayer(bytes32[] memory layer) public pure returns (bytes32[] memory) {
-        // uint nLayers = log2(layer.length);
+        // uint nLayers = math_log2(layer.length);
         // bytes32[] memory nextLayer = new bytes32[](2**(nLayers-1));
-        require(layer.length == 2 ** log2(layer.length), "NOT_PERFECT_POWEROF2");
+        require(layer.length == 2 ** math_log2(layer.length), "NOT_PERFECT_POWEROF2");
         
         bytes32[] memory nextLayer = new bytes32[](layer.length / 2);
         

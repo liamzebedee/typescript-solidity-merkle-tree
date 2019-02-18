@@ -37,19 +37,6 @@ class MerkleTree {
 		this.hashFn = hashFn;
 		this.hashSizeBytes = hashFn(BRANCH_PREFIX).byteLength;
 
-		// Filter empty
-		// leaves = leaves.filter(el => el)
-
-		// check for duplicates
-		// leaves.filter((buf, idx) => {
-		// 	if (firstIndexOf(buf, leaves) !== idx) throw new Error(`Duplicate item at ${idx}`);
-		// });
-		
-		// sort DESC order
-		// leaves = leaves.sort()
-		
-		// this.leaves = leaves;
-
 		// compute the balanced layer
 		if(leaves.length === 1) leaves = leaves.concat(leaves)
 		let balancedLeaves = new Array<Buffer>(
@@ -66,10 +53,8 @@ class MerkleTree {
 			}
 		}
 
-		// layers[i] = balancedLeaves;
 		leaves = balancedLeaves;
 
-		
 		// Now hash all.
 		this.leaves = leaves.map(leaf => this.hashLeaf(leaf))
 		
@@ -129,10 +114,14 @@ class MerkleTree {
 		return { proofs, paths, leaf, root: this.root() }
 	}
 
-	verifyProof(proof: MerkleTreeProof, leaf: Buffer) {
+	// TODO remove leaf param
+	verifyProof(proof: MerkleTreeProof, leaf?: Buffer) {
+		if(!leaf) {
+			leaf = proof.leaf;
+		}
 		if (proof.proofs.length != this.nLayers - 1) throw new Error(`${proof.proofs.length} proof nodes, but only ${this.nLayers} layers in tree`)
 		if(firstIndexOf(leaf, this.layers[0]) == -1) throw new Error(`Leaf doesn't exist in original tree`);
-		return verifyProof(this.hashFn, proof, this.root(), proof.leaf);
+		return verifyProof(this.hashFn, proof, this.root(), leaf);
 	}
 
 	private computeTree(leaves: Buffer[]) {
@@ -160,7 +149,6 @@ class MerkleTree {
 		if (leaves.length % 2 == 1) {
 			// Some languages (ie Solidity) don't have prepend, so this makes compatible implementations easier.
 			leaves = [...leaves, leaves[leaves.length - 1]]
-			// leaves = [leaves[0], ...leaves]
 		}
 
 		for (let i = 0; i < leaves.length;) {
@@ -184,7 +172,7 @@ class MerkleTree {
 			for (let node of layer) {
 				str += '\t ' + node.toString('hex');
 				if(i == 0) {
-					if(j < this.items.length - 1)
+					if(j < this.items.length)
 						str += '\t' + this.items[j++].toString('hex')
 				}
 				str += '\n';
@@ -234,8 +222,6 @@ function verifyProof(hashFn: HashFunction, proof: MerkleTreeProof, root: Buffer,
 
 	return root.equals(node);
 }
-
-export * from './mmr'
 
 export {
 	MerkleTree,
